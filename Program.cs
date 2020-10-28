@@ -5,7 +5,7 @@ using System.Runtime;
 
 namespace cs
 {
-    class Args{
+    class Args{        
         public int from;
         public int to;
 
@@ -18,15 +18,15 @@ namespace cs
     }
     class Program
     {
-        private static void Count (int from, int to, out int result){
-            result = 0;
+        private static int Count (int from, int to){
+            int result = 0;
             for (int i=from;i<to;i++)
-             result += i;
-            
+             result += i;            
+            return result;
         }
         private static void Wrap (IntPtr data){
             var args = (Args) GCHandle.FromIntPtr(data).Target;
-            Count (args.from, args.to, out args.result);            
+            args.result = Count (args.from, args.to);            
         }
         static void Main(string[] args)
         {
@@ -37,9 +37,8 @@ namespace cs
             IntPtr ziped2 = (IntPtr) GCHandle.Alloc(arrgs2);
             IntPtr t2 =  WinApiFuncs.CreateThread(Wrap, ziped2);
 
-            WinApiFuncs.WaitForSingleObject(t1, 1000);
-            Console.WriteLine (arrgs1.result);
-            WinApiFuncs.WaitForSingleObject(t2, 1000);
+            WinApiFuncs.WaitForMultipleObjects(2, new IntPtr[2]{t1,t2}, true, 100000000);
+            Console.WriteLine (arrgs1.result);            
             Console.WriteLine (arrgs2.result);
             
         }
